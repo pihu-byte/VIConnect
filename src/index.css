@@ -1,19 +1,9 @@
 @import "tailwindcss";
 
 @theme {
-  --font-inter: 'Inter', sans-serif;
-}
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  font-family: 'Inter', sans-serif;
+  --color-primary: #2463eb;
+  --color-background-light: #f6f6f8;
+  --color-background-dark: #111621;
+  --color-indigo-accent: #4f46e5;
+  --font-display: "Inter", sans-serif;
 }
