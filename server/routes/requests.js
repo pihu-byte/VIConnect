@@ -48,11 +48,11 @@ router.get('/inbox', verifyToken, async (req, res) => {
 
     const incoming = await RideRequest.find({ ride: { $in: myRideIds } })
       .populate('ride', 'from destination date time fare genderCategory')
-      .populate('requestedBy', 'fullName email department gender')
+      .populate('requestedBy', 'fullName email department gender avatar')
       .sort({ createdAt: -1 });
 
     const outgoing = await RideRequest.find({ requestedBy: req.user.id })
-      .populate({ path: 'ride', populate: { path: 'createdBy', select: 'fullName email department' } })
+      .populate({ path: 'ride', populate: { path: 'createdBy', select: 'fullName email department avatar' } })
       .sort({ createdAt: -1 });
 
     return res.status(200).json({ incoming, outgoing });

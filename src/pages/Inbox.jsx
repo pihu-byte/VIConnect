@@ -35,6 +35,8 @@ export default function InboxPage() {
   
   const messagesEndRef = useRef(null);
   const pollRef = useRef(null);
+  const selectedRef = useRef(null);
+  const activeTypeRef = useRef(activeType);
   const token = localStorage.getItem('viconnect_token');
   const { missingFields } = useMissingFields();
 
@@ -43,15 +45,27 @@ export default function InboxPage() {
     if (!token || !userStr) { navigate('/login', { replace: true }); return; }
     setCurrentUser(JSON.parse(userStr));
     refreshAll();
-    const interval = setInterval(refreshAll, 10000);
+    const interval = setInterval(refreshAll, 5000);
     return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
+    selectedRef.current = selected;
+  }, [selected]);
+
+  useEffect(() => {
+    activeTypeRef.current = activeType;
+  }, [activeType]);
+
+  useEffect(() => {
     if (pollRef.current) clearInterval(pollRef.current);
     if (selected?.status === 'approved') {
-      fetchMessages();
-      pollRef.current = setInterval(fetchMessages, 2000);
+      fetchMessagesNow(selected._id, activeType);
+      pollRef.current = setInterval(() => {
+        const sel = selectedRef.current;
+        const type = activeTypeRef.current;
+        if (sel?.status === 'approved') fetchMessagesNow(sel._id, type);
+      }, 2000);
     }
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
   }, [selected?._id, selected?.status, activeType]);
@@ -87,14 +101,21 @@ export default function InboxPage() {
     setLoading(false);
   };
 
-  const fetchMessages = async () => {
-    if (!selected) return;
-    const endpoint = activeType === 'rides' ? `/api/messages/${selected._id}` : `/api/team-messages/${selected._id}`;
+  const fetchMessagesNow = async (requestId, type) => {
+    if (!requestId) return;
+    const endpoint = type === 'rides' ? `/api/messages/${requestId}` : `/api/team-messages/${requestId}`;
     try {
       const res = await fetch(endpoint, { headers: { Authorization: `Bearer ${token}` } });
       const data = await res.json();
       if (res.ok) setMessages(data.messages || []);
     } catch (e) { console.error(e); }
+  };
+
+  const fetchMessages = async () => {
+    const sel = selectedRef.current;
+    const type = activeTypeRef.current;
+    if (!sel) return;
+    await fetchMessagesNow(sel._id, type);
   };
 
   const handleAction = async (requestId, status) => {
@@ -149,8 +170,9 @@ export default function InboxPage() {
 
   const selectConversation = (req) => {
     setSelected(req);
+    selectedRef.current = req;
     setMessages([]);
-    if (req.status === 'approved') fetchMessages();
+    if (req.status === 'approved') fetchMessagesNow(req._id, activeType);
   };
 
   const handleLogout = () => {
