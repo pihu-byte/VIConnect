@@ -20,7 +20,7 @@ router.get('/:requestId', verifyToken, async (req, res) => {
     if (!canAccess(request, req.user.id)) return res.status(403).json({ message: 'Not authorized.' });
 
     const messages = await Message.find({ request: req.params.requestId })
-      .populate('sender', 'fullName email')
+      .populate('sender', 'fullName email avatar')
       .sort({ createdAt: 1 });
     return res.status(200).json({ messages });
   } catch (err) {
@@ -41,7 +41,7 @@ router.post('/:requestId', verifyToken, async (req, res) => {
 
     const message = new Message({ request: req.params.requestId, sender: req.user.id, text: text.trim() });
     await message.save();
-    const populated = await Message.findById(message._id).populate('sender', 'fullName email');
+    const populated = await Message.findById(message._id).populate('sender', 'fullName email avatar');
     return res.status(201).json({ data: populated });
   } catch (err) {
     return res.status(500).json({ message: 'Server error.' });

@@ -68,8 +68,21 @@ export default function InboxPage() {
       ]);
       const ridesData = await ridesRes.json();
       const teamsData = await teamsRes.json();
-      if (ridesRes.ok) setRidesInbox({ incoming: ridesData.incoming || [], outgoing: ridesData.outgoing || [] });
-      if (teamsRes.ok) setTeamsInbox({ incoming: teamsData.incoming || [], outgoing: teamsData.outgoing || [] });
+      
+      const inRides = ridesData.incoming || [];
+      const outRides = ridesData.outgoing || [];
+      const inTeams = teamsData.incoming || [];
+      const outTeams = teamsData.outgoing || [];
+      
+      if (ridesRes.ok) setRidesInbox({ incoming: inRides, outgoing: outRides });
+      if (teamsRes.ok) setTeamsInbox({ incoming: inTeams, outgoing: outTeams });
+      
+      setSelected(prev => {
+        if (!prev) return prev;
+        const allRides = [...inRides, ...outRides];
+        const allTeams = [...inTeams, ...outTeams];
+        return allRides.find(r => r._id === prev._id) || allTeams.find(t => t._id === prev._id) || prev;
+      });
     } catch (e) { console.error(e); }
     setLoading(false);
   };

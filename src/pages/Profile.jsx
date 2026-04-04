@@ -41,6 +41,7 @@ export default function Profile() {
     setFormData({
       fullName: user.fullName || '',
       department: user.department || '',
+      gender: user.gender || '',
       avatar: user.avatar || '',
       phoneNumber: user.phoneNumber || '',
       bio: user.bio || '',
@@ -240,6 +241,37 @@ export default function Profile() {
                       <option value="eee">EEE</option>
                       <option value="mech">Mech</option>
                     </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold mb-2 flex items-center gap-2">
+                      Gender
+                      {currentUser?.gender ? (
+                        <span className="text-[10px] font-black uppercase bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 px-2 py-0.5 rounded-full flex items-center gap-1">
+                          <span className="material-symbols-outlined text-[10px]">lock</span>Locked
+                        </span>
+                      ) : missingFields.some(f => f.key === 'gender') && (
+                        <span className="text-[10px] font-black uppercase bg-amber-100 text-amber-700 dark:bg-amber-800/50 dark:text-amber-300 px-2 py-0.5 rounded-full">Required</span>
+                      )}
+                    </label>
+                    {currentUser?.gender ? (
+                      <div className={`${inputClass} bg-slate-100 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 cursor-not-allowed capitalize`}>
+                        {currentUser.gender}
+                      </div>
+                    ) : (
+                      <select
+                        className={inputClass}
+                        value={formData.gender}
+                        onChange={e => setFormData({ ...formData, gender: e.target.value })}
+                        required
+                      >
+                        <option value="" disabled>Select Gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                      </select>
+                    )}
+                    {currentUser?.gender && (
+                      <p className="text-[10px] text-slate-400 mt-1.5 font-medium">Gender cannot be changed once set.</p>
+                    )}
                   </div>
                 </div>
 

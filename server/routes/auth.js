@@ -179,13 +179,14 @@ router.post('/profile', async (req, res) => {
   if (!decoded) return res.status(401).json({ message: 'Not authenticated.' });
 
   try {
-    const { fullName, department, avatar, phoneNumber, bio } = req.body;
+    const { fullName, department, gender, avatar, phoneNumber, bio } = req.body;
     
     const user = await User.findById(decoded.id);
     if (!user) return res.status(404).json({ message: 'User not found.' });
     
     if (fullName) user.fullName = fullName;
     if (department) user.department = department;
+    if (gender) user.gender = gender;
     if (avatar !== undefined) user.avatar = avatar;
     if (phoneNumber !== undefined) user.phoneNumber = phoneNumber;
     if (bio !== undefined) user.bio = bio;
