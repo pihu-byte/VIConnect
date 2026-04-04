@@ -8,6 +8,12 @@ import { dirname, join } from 'path';
 dotenv.config({ path: join(dirname(fileURLToPath(import.meta.url)), '.env') });
 
 import authRoutes from './routes/auth.js';
+import rideRoutes from './routes/rides.js';
+import requestRoutes from './routes/requests.js';
+import messageRoutes from './routes/messages.js';
+import teamRoutes from './routes/teams.js';
+import teamRequestRoutes from './routes/teamRequests.js';
+import teamMessageRoutes from './routes/teamMessages.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -21,6 +27,12 @@ app.use(express.json());
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/rides', rideRoutes);
+app.use('/api/requests', requestRoutes);
+app.use('/api/messages', messageRoutes);
+app.use('/api/teams', teamRoutes);
+app.use('/api/team-requests', teamRequestRoutes);
+app.use('/api/team-messages', teamMessageRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

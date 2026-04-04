@@ -8,7 +8,7 @@ const router = express.Router();
 // Helper: generate JWT
 const generateToken = (user) =>
   jwt.sign(
-    { id: user._id, email: user.email, fullName: user.fullName },
+    { id: user._id, email: user.email, fullName: user.fullName, gender: user.gender },
     process.env.JWT_SECRET,
     { expiresIn: '7d' }
   );
@@ -16,10 +16,9 @@ const generateToken = (user) =>
 // POST /api/auth/register
 router.post('/register', async (req, res) => {
   try {
-    const { fullName, registrationNumber, email, department, password, confirmPassword } = req.body;
+    const { fullName, registrationNumber, email, department, gender, password, confirmPassword } = req.body;
 
-    // Basic validation
-    if (!fullName || !registrationNumber || !email || !department || !password) {
+    if (!fullName || !registrationNumber || !email || !department || !gender || !password) {
       return res.status(400).json({ message: 'All fields are required.' });
     }
     if (password !== confirmPassword) {
@@ -29,7 +28,6 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ message: 'Password must be at least 6 characters.' });
     }
 
-    // Check for existing user
     const existingEmail = await User.findOne({ email: email.toLowerCase() });
     if (existingEmail) {
       return res.status(409).json({ message: 'An account with this email already exists.' });
@@ -39,32 +37,24 @@ router.post('/register', async (req, res) => {
       return res.status(409).json({ message: 'This registration number is already registered.' });
     }
 
-    // Hash password
     const salt = await bcrypt.genSalt(12);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Create user
     const user = new User({
       fullName,
       registrationNumber: registrationNumber.toUpperCase(),
       email: email.toLowerCase(),
       department,
+      gender,
       password: hashedPassword,
     });
     await user.save();
 
     const token = generateToken(user);
-
     return res.status(201).json({
       message: 'Account created successfully.',
       token,
-      user: {
-        id: user._id,
-        fullName: user.fullName,
-        email: user.email,
-        registrationNumber: user.registrationNumber,
-        department: user.department,
-      },
+      user: { id: user._id, fullName: user.fullName, email: user.email, registrationNumber: user.registrationNumber, department: user.department, gender: user.gender },
     });
   } catch (err) {
     console.error('Register error:', err);
@@ -98,13 +88,7 @@ router.post('/login', async (req, res) => {
     return res.status(200).json({
       message: 'Login successful.',
       token,
-      user: {
-        id: user._id,
-        fullName: user.fullName,
-        email: user.email,
-        registrationNumber: user.registrationNumber,
-        department: user.department,
-      },
+      user: { id: user._id, fullName: user.fullName, email: user.email, registrationNumber: user.registrationNumber, department: user.department, gender: user.gender },
     });
   } catch (err) {
     console.error('Login error:', err);
@@ -125,6 +109,45 @@ router.get('/me', async (req, res) => {
     return res.status(200).json({ user });
   } catch {
     return res.status(403).json({ message: 'Invalid token.' });
+  }
+});
+
+// PUT /api/auth/profile — update profile (fullName, department, avatar)
+router.post('/profile', async (req, res) => {
+  console.log('--- Profile Update Request Received ---');
+  console.log('Body:', req.body);
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  if (!token) return res.status(401).json({ message: 'Not authenticated.' });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const { fullName, department, avatar } = req.body;
+    
+    const user = await User.findById(decoded.id);
+    if (!user) return res.status(404).json({ message: 'User not found.' });
+    
+    if (fullName) user.fullName = fullName;
+    if (department) user.department = department;
+    if (avatar !== undefined) user.avatar = avatar;
+    
+    await user.save();
+    
+    return res.status(200).json({ 
+      message: 'Profile updated.', 
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        registrationNumber: user.registrationNumber,
+        department: user.department,
+        gender: user.gender,
+        avatar: user.avatar
+      }
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: 'Server error.' });
   }
 });
 

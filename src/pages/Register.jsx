@@ -8,6 +8,7 @@ export default function VitConnectRegister() {
         registrationNumber: '',
         email: '',
         department: '',
+        gender: '',
         password: '',
         confirmPassword: '',
     });
@@ -175,6 +176,19 @@ export default function VitConnectRegister() {
                                     <option value="eee">Electrical &amp; Electronics (EEE)</option>
                                     <option value="mech">Mechanical Engineering</option>
                                 </select>
+                            </div>
+
+                            <div className="flex flex-col gap-1.5">
+                                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Gender</label>
+                                <div className="grid grid-cols-2 gap-3">
+                                    {[{ value: 'male', label: 'Male', icon: 'man' }, { value: 'female', label: 'Female', icon: 'woman' }].map(opt => (
+                                        <label key={opt.value} className={`flex items-center gap-3 p-3.5 rounded-xl border-2 cursor-pointer transition-all ${formData.gender === opt.value ? 'border-primary bg-primary/5 text-primary' : 'border-slate-200 dark:border-slate-700 text-slate-500 hover:border-primary/40'}`}>
+                                            <input type="radio" name="gender" value={opt.value} checked={formData.gender === opt.value} onChange={handleInputChange} className="hidden" required />
+                                            <span className="material-symbols-outlined text-2xl">{opt.icon}</span>
+                                            <span className="font-bold text-sm">{opt.label}</span>
+                                        </label>
+                                    ))}
+                                </div>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
