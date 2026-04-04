@@ -8,11 +8,11 @@ const router = express.Router();
 // POST /api/teams — create
 router.post('/', verifyToken, async (req, res) => {
   try {
-    const { name, description, skillsRequired, memberCount, projectTitle, projectDescription } = req.body;
+    const { name, description, skillsRequired, memberCount, projectTitle, projectDescription, hackathonDate } = req.body;
     if (!name || !description || !memberCount || !projectTitle) {
       return res.status(400).json({ message: 'Name, description, member count and project title are required.' });
     }
-    const team = new Team({ name, description, skillsRequired: skillsRequired || [], memberCount: Number(memberCount), projectTitle, projectDescription, createdBy: req.user.id });
+    const team = new Team({ name, description, skillsRequired: skillsRequired || [], memberCount: Number(memberCount), projectTitle, projectDescription, hackathonDate, createdBy: req.user.id });
     await team.save();
     const populated = await Team.findById(team._id).populate('createdBy', 'fullName email department avatar');
     return res.status(201).json({ message: 'Team created!', team: populated });

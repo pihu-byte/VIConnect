@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
+import useMissingFields from '../hooks/useMissingFields';
 
 const departmentLabel = { cse: 'CSE', it: 'IT', ece: 'ECE', eee: 'EEE', mech: 'Mech' };
 const genderIcon = { both: 'people', male: 'man', female: 'woman' };
@@ -16,6 +17,7 @@ export default function VitConnectDashboard() {
   const [toastMsg, setToastMsg] = useState('');
   const [loading, setLoading] = useState(true);
   const token = localStorage.getItem('viconnect_token');
+  const { missingFields } = useMissingFields();
 
   useEffect(() => {
     const userStr = localStorage.getItem('viconnect_user');
@@ -120,6 +122,7 @@ export default function VitConnectDashboard() {
     }
     const genderMismatch = ride.genderCategory !== 'both' && currentUser?.gender && currentUser.gender !== ride.genderCategory;
     if (genderMismatch) return <span className="px-4 py-2 text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-400 rounded-lg">Not Eligible</span>;
+    if (ride.seatsAvailable <= 0) return <span className="px-4 py-2 text-xs font-bold bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 rounded-lg flex items-center gap-1"><span className="material-symbols-outlined text-[14px]">event_busy</span>Ride Full</span>;
     if (requestedIds.has(ride._id)) return <span className="px-4 py-2 text-xs font-bold bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-lg flex items-center gap-1"><span className="material-symbols-outlined text-[14px]">check</span>Requested</span>;
     return (
       <button
@@ -136,7 +139,7 @@ export default function VitConnectDashboard() {
 
   return (
     <div className="bg-slate-50 dark:bg-slate-950 font-display text-slate-900 dark:text-slate-100 flex min-h-screen">
-      <Sidebar currentUser={currentUser} onLogout={handleLogout} />
+      <Sidebar currentUser={currentUser} onLogout={handleLogout} missingFields={missingFields} />
 
       {/* Toast */}
       {toastMsg && (
@@ -158,7 +161,12 @@ export default function VitConnectDashboard() {
             </button>
             <div className="h-8 w-px bg-slate-200 dark:bg-slate-700" />
             <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/profile')}>
-              <img alt="Avatar" className="size-9 rounded-full ring-2 ring-primary/20 object-cover" src={currentUser.avatar || `https://i.pravatar.cc/50?u=${currentUser.email}`} />
+              <div className="relative">
+                <img alt="Avatar" className="size-9 rounded-full ring-2 ring-primary/20 object-cover" src={currentUser.avatar || `https://i.pravatar.cc/50?u=${currentUser.email}`} />
+                {missingFields.length > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 size-3 bg-amber-500 rounded-full border-2 border-white dark:border-slate-900 animate-pulse" />
+                )}
+              </div>
               <div className="hidden sm:block">
                  <p className="text-xs font-black uppercase leading-none">{currentUser.fullName}</p>
                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">{currentUser.department}</p>
@@ -241,6 +249,9 @@ export default function VitConnectDashboard() {
                              </p>
                              <p className="text-xs text-slate-500 font-bold flex items-center gap-1">
                                <span className="material-symbols-outlined text-[14px]">person</span> {ride.createdBy?.fullName}
+                             </p>
+                             <p className="text-xs text-slate-500 font-bold flex items-center gap-1">
+                               <span className="material-symbols-outlined text-[14px]">event_seat</span> {ride.seatsAvailable} seat{ride.seatsAvailable !== 1 && 's'} left
                              </p>
                           </div>
                           <div className="flex items-center gap-2 mt-3">

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
+import useMissingFields from '../hooks/useMissingFields';
 
 export default function PostRide() {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ export default function PostRide() {
   });
 
   const token = localStorage.getItem('viconnect_token');
+  const { missingFields } = useMissingFields();
 
   useEffect(() => {
     const userStr = localStorage.getItem('viconnect_user');
@@ -61,7 +63,7 @@ export default function PostRide() {
 
   return (
     <div className="bg-slate-50 dark:bg-slate-950 font-display text-slate-900 dark:text-slate-100 flex min-h-screen">
-      <Sidebar currentUser={currentUser} onLogout={handleLogout} />
+      <Sidebar currentUser={currentUser} onLogout={handleLogout} missingFields={missingFields} />
 
       <div className="flex-1 ml-64 flex flex-col">
         <header className="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center px-8 sticky top-0 z-10">
@@ -151,6 +153,7 @@ export default function PostRide() {
                       <select className={inputClass} name="seatsAvailable" value={form.seatsAvailable} onChange={handleChange} required>
                         {[1,2,3,4,5,6,7,8].map(n => <option key={n} value={n}>{n} seat{n > 1 ? 's' : ''}</option>)}
                       </select>
+                      <p className="text-[10px] text-slate-400 font-bold mt-2 flex items-center gap-1"><span className="material-symbols-outlined text-[12px]">info</span>Seats will decrease automatically as you approve requests.</p>
                     </div>
                   </div>
 

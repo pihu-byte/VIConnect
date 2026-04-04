@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-export default function Sidebar({ currentUser, onLogout }) {
+export default function Sidebar({ currentUser, onLogout, missingFields = [] }) {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -19,6 +19,7 @@ export default function Sidebar({ currentUser, onLogout }) {
   ];
 
   const isActive = (path) => location.pathname === path;
+  const hasMissing = missingFields.length > 0;
 
   return (
     <aside className="w-64 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col fixed h-full z-20">
@@ -52,7 +53,7 @@ export default function Sidebar({ currentUser, onLogout }) {
             <button
               key={item.name}
               onClick={() => navigate(item.path)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all text-left group ${
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all text-left group relative ${
                 isActive(item.path)
                   ? 'bg-primary/5 text-primary'
                   : 'text-slate-600 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800'
@@ -60,6 +61,16 @@ export default function Sidebar({ currentUser, onLogout }) {
             >
               <span className={`material-symbols-outlined transition-colors ${isActive(item.path) ? 'text-primary' : 'text-slate-400 group-hover:text-primary/70'}`}>{item.icon}</span>
               <span className="text-sm">{item.name}</span>
+              {/* Missing fields notification badge */}
+              {hasMissing && (
+                <span className="ml-auto flex items-center gap-1.5">
+                  <span className="relative flex size-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full size-2.5 bg-amber-500"></span>
+                  </span>
+                  <span className="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase">{missingFields.length}</span>
+                </span>
+              )}
             </button>
           ))}
         </div>
@@ -68,11 +79,16 @@ export default function Sidebar({ currentUser, onLogout }) {
       <div className="p-4 border-t border-slate-200 dark:border-slate-800">
         {currentUser && (
           <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 shadow-sm">
-            <img
-              alt="User"
-              className="size-10 rounded-full ring-2 ring-primary/20 object-cover shadow-sm"
-              src={currentUser.avatar || `https://i.pravatar.cc/150?u=${currentUser.email}`}
-            />
+            <div className="relative">
+              <img
+                alt="User"
+                className="size-10 rounded-full ring-2 ring-primary/20 object-cover shadow-sm"
+                src={currentUser.avatar || `https://i.pravatar.cc/150?u=${currentUser.email}`}
+              />
+              {hasMissing && (
+                <span className="absolute -top-0.5 -right-0.5 size-3 bg-amber-500 rounded-full border-2 border-white dark:border-slate-800" />
+              )}
+            </div>
             <div className="overflow-hidden flex-1">
               <p className="text-xs font-black truncate text-slate-900 dark:text-white uppercase">{currentUser.fullName}</p>
               <p className="text-[10px] text-slate-500 truncate font-bold uppercase tracking-widest">{currentUser.department}</p>

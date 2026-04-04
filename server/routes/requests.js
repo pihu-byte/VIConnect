@@ -74,6 +74,19 @@ router.patch('/:id', verifyToken, async (req, res) => {
     if (request.ride.createdBy.toString() !== req.user.id) {
       return res.status(403).json({ message: 'Not authorized.' });
     }
+
+    // Handle seat counts
+    if (status === 'approved' && request.status !== 'approved') {
+      if (request.ride.seatsAvailable <= 0) {
+        return res.status(400).json({ message: 'Ride is full, cannot approve more passengers.' });
+      }
+      request.ride.seatsAvailable -= 1;
+      await request.ride.save();
+    } else if (status === 'denied' && request.status === 'approved') {
+      request.ride.seatsAvailable += 1;
+      await request.ride.save();
+    }
+
     request.status = status;
     await request.save();
     return res.status(200).json({ message: `Request ${status}.`, request });

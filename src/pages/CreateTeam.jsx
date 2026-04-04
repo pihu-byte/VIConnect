@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
+import useMissingFields from '../hooks/useMissingFields';
 
 export default function CreateTeam() {
   const navigate = useNavigate();
@@ -11,13 +12,16 @@ export default function CreateTeam() {
   const [form, setForm] = useState({
     name: '',
     description: '',
-    skillsRequired: '',
+    skillsRequired: [],
     memberCount: '3',
     projectTitle: '',
     projectDescription: '',
+    hackathonDate: '',
   });
+  const [skillInput, setSkillInput] = useState('');
 
   const token = localStorage.getItem('viconnect_token');
+  const { missingFields } = useMissingFields();
 
   useEffect(() => {
     const userStr = localStorage.getItem('viconnect_user');
@@ -35,11 +39,10 @@ export default function CreateTeam() {
     setLoading(true);
     setError('');
     try {
-      const skillsArray = form.skillsRequired.split(',').map(s => s.trim()).filter(s => s);
       const res = await fetch('/api/teams', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ ...form, skillsRequired: skillsArray }),
+        body: JSON.stringify(form),
       });
       const data = await res.json();
       if (res.ok) {
@@ -67,7 +70,7 @@ export default function CreateTeam() {
 
   return (
     <div className="bg-slate-50 dark:bg-slate-950 font-display text-slate-900 dark:text-slate-100 flex min-h-screen">
-      <Sidebar currentUser={currentUser} onLogout={handleLogout} />
+      <Sidebar currentUser={currentUser} onLogout={handleLogout} missingFields={missingFields} />
 
       <div className="flex-1 ml-64 flex flex-col">
         <header className="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center px-8 sticky top-0 z-10">
@@ -105,8 +108,35 @@ export default function CreateTeam() {
                         <textarea name="description" className={inputClass} rows="4" placeholder="Brief about your team culture..." value={form.description} onChange={handleChange} required />
                       </div>
                       <div>
-                        <label className={labelClass}>Skills Required (comma separated)</label>
-                        <input name="skillsRequired" className={inputClass} placeholder="React, Node.js, UI/UX" value={form.skillsRequired} onChange={handleChange} required />
+                        <label className={labelClass}>Skills Required</label>
+                        <div className="flex flex-col gap-2">
+                          <input 
+                            className={inputClass} 
+                            placeholder="Type a skill and press Enter (e.g. React, UI/UX)" 
+                            value={skillInput} 
+                            onChange={e => setSkillInput(e.target.value)} 
+                            onKeyDown={e => {
+                              if (e.key === 'Enter' || e.key === ',') {
+                                e.preventDefault();
+                                const val = skillInput.trim();
+                                if (val && !form.skillsRequired.includes(val)) {
+                                  setForm(f => ({ ...f, skillsRequired: [...f.skillsRequired, val] }));
+                                }
+                                setSkillInput('');
+                              }
+                            }}
+                          />
+                          {form.skillsRequired.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mt-1">
+                              {form.skillsRequired.map(skill => (
+                                <span key={skill} className="bg-primary/10 text-primary text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1">
+                                  {skill}
+                                  <button type="button" onClick={() => setForm(f => ({ ...f, skillsRequired: f.skillsRequired.filter(s => s !== skill) }))} className="hover:text-red-500 material-symbols-outlined text-[14px]">close</button>
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       </div>
                       <div>
                         <label className={labelClass}>Members Required</label>
@@ -124,7 +154,11 @@ export default function CreateTeam() {
                       </div>
                       <div>
                         <label className={labelClass}>Project Description</label>
-                        <textarea name="projectDescription" className={inputClass} rows="11" placeholder="What are you building? Explain the goal, tech stack, and roadmap..." value={form.projectDescription} onChange={handleChange} required />
+                        <textarea name="projectDescription" className={inputClass} rows="6" placeholder="What are you building? Explain the goal, tech stack, and roadmap..." value={form.projectDescription} onChange={handleChange} required />
+                      </div>
+                      <div>
+                        <label className={labelClass}>Hackathon Date (Optional)</label>
+                        <input type="date" name="hackathonDate" className={inputClass} value={form.hackathonDate} onChange={handleChange} />
                       </div>
                     </div>
                   </div>

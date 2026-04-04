@@ -7,6 +7,7 @@ const teamSchema = new mongoose.Schema({
   memberCount: { type: Number, required: true, min: 1, max: 20 },
   projectTitle: { type: String, required: true, trim: true },
   projectDescription: { type: String, trim: true },
+  hackathonDate: { type: String, trim: true },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   status: { type: String, enum: ['active', 'completed'], default: 'active' },
   completedAt: { type: Date },

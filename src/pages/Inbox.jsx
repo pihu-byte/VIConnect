@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
+import useMissingFields from '../hooks/useMissingFields';
 
 const StatusBadge = ({ status }) => {
   const styles = {
@@ -35,6 +36,7 @@ export default function InboxPage() {
   const messagesEndRef = useRef(null);
   const pollRef = useRef(null);
   const token = localStorage.getItem('viconnect_token');
+  const { missingFields } = useMissingFields();
 
   useEffect(() => {
     const userStr = localStorage.getItem('viconnect_user');
@@ -150,7 +152,7 @@ export default function InboxPage() {
 
   return (
     <div className="bg-slate-50 dark:bg-slate-950 font-display text-slate-900 dark:text-slate-100 flex min-h-screen">
-      <Sidebar currentUser={currentUser} onLogout={handleLogout} />
+      <Sidebar currentUser={currentUser} onLogout={handleLogout} missingFields={missingFields} />
 
       <div className="flex-1 ml-64 flex flex-col h-screen overflow-hidden">
         {/* Header */}
