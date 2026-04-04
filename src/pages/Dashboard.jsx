@@ -122,6 +122,7 @@ export default function VitConnectDashboard() {
     }
     const genderMismatch = ride.genderCategory !== 'both' && currentUser?.gender && currentUser.gender !== ride.genderCategory;
     if (genderMismatch) return <span className="px-4 py-2 text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-400 rounded-lg">Not Eligible</span>;
+    if (ride.seatsAvailable <= 0) return <span className="px-4 py-2 text-xs font-bold bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 rounded-lg flex items-center gap-1"><span className="material-symbols-outlined text-[14px]">event_busy</span>Ride Full</span>;
     if (requestedIds.has(ride._id)) return <span className="px-4 py-2 text-xs font-bold bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-lg flex items-center gap-1"><span className="material-symbols-outlined text-[14px]">check</span>Requested</span>;
     return (
       <button
@@ -248,6 +249,9 @@ export default function VitConnectDashboard() {
                              </p>
                              <p className="text-xs text-slate-500 font-bold flex items-center gap-1">
                                <span className="material-symbols-outlined text-[14px]">person</span> {ride.createdBy?.fullName}
+                             </p>
+                             <p className="text-xs text-slate-500 font-bold flex items-center gap-1">
+                               <span className="material-symbols-outlined text-[14px]">event_seat</span> {ride.seatsAvailable} seat{ride.seatsAvailable !== 1 && 's'} left
                              </p>
                           </div>
                           <div className="flex items-center gap-2 mt-3">

@@ -153,6 +153,7 @@ export default function PostRide() {
                       <select className={inputClass} name="seatsAvailable" value={form.seatsAvailable} onChange={handleChange} required>
                         {[1,2,3,4,5,6,7,8].map(n => <option key={n} value={n}>{n} seat{n > 1 ? 's' : ''}</option>)}
                       </select>
+                      <p className="text-[10px] text-slate-400 font-bold mt-2 flex items-center gap-1"><span className="material-symbols-outlined text-[12px]">info</span>Seats will decrease automatically as you approve requests.</p>
                     </div>
                   </div>
 

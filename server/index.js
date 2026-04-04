@@ -17,6 +17,7 @@ import messageRoutes from './routes/messages.js';
 import teamRoutes from './routes/teams.js';
 import teamRequestRoutes from './routes/teamRequests.js';
 import teamMessageRoutes from './routes/teamMessages.js';
+import teamGroupMessageRoutes from './routes/teamGroupMessages.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -39,6 +40,7 @@ app.use('/api/messages', messageRoutes);
 app.use('/api/teams', teamRoutes);
 app.use('/api/team-requests', teamRequestRoutes);
 app.use('/api/team-messages', teamMessageRoutes);
+app.use('/api/team-group-messages', teamGroupMessageRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
